@@ -14,7 +14,7 @@ Base = automap_base()
 Base.prepare(engine, reflect = True)
 Station = Base.classes.station
 Measurement = Base.classes.measurement
-session = Session(engine)
+
 
 app = Flask(__name__) 
 
@@ -25,6 +25,7 @@ def home():
 
 @app.route("/api/v1.0/precipitation")
 def prcp():
+    session = Session(engine)
     # Calculate the date 1 year ago from the last data point in the database
     last_date = session.query(func.max(Measurement.date)).scalar()
     start_date = dt.datetime.strptime(last_date, '%Y-%m-%d').date() - dt.timedelta(days=365)
@@ -40,6 +41,7 @@ def prcp():
 
 @app.route("/api/v1.0/stations")
 def stations():
+    session = Session(engine)
     station_rows = session.query(Measurement.station).group_by(Measurement.station).\
         order_by(func.count(Measurement.station).desc()).all()
     
@@ -47,6 +49,7 @@ def stations():
 
 @app.route('/api/v1.0/tobs')
 def tobs():
+    session = Session(engine)
     last_date = session.query(func.max(Measurement.date)).scalar()
     start_date = dt.datetime.strptime(last_date, '%Y-%m-%d').date() - dt.timedelta(days=365)
     station_rows = session.query(Measurement.station,func.count(Measurement.station)).group_by(Measurement.station).\
@@ -59,6 +62,7 @@ def tobs():
 
 @app.route('/api/v1.0/<start>')
 def start(start):
+    session = Session(engine)
     """TMIN, TAVG, and TMAX for a list of dates.
     
     Args:
@@ -73,6 +77,7 @@ def start(start):
 
 @app.route('/api/v1.0/<start>/<end>')
 def startend(start, end):
+    session = Session(engine)
     """TMIN, TAVG, and TMAX for a list of dates.
     
     Args:
